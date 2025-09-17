@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Monad Analytics</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="/assets/monad-favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">M</div>
+                Monad Analytics
+            </a>
+            <button class="mobile-menu-toggle">☰</button>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard" class="active">Dashboard</a></li>
+                <li><a href="/transactions">Transactions</a></li>
+                <li><a href="/validators">Validators</a></li>
+                <li><a href="/dapps">dApps</a></li>
+                <li><a href="/network">Network</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="mb-3">
+                <h1>Network Dashboard</h1>
+                <p class="text-muted">Real-time monitoring of the Monad blockchain network</p>
+            </div>
+
+            <!-- Key Metrics -->
+            <section class="metrics-grid fade-in-up" id="dashboard-metrics">
+                <div class="metric-card">
+                    <div class="metric-value" id="current-tps">--</div>
+                    <div class="metric-label">Current TPS</div>
+                    <div class="metric-change positive" id="tps-change">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="block-height">--</div>
+                    <div class="metric-label">Block Height</div>
+                    <div class="metric-change" id="height-change">Live</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="gas-price">--</div>
+                    <div class="metric-label">Gas Price (gwei)</div>
+                    <div class="metric-change" id="gas-change">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="active-validators">--</div>
+                    <div class="metric-label">Active Validators</div>
+                    <div class="metric-change positive" id="validators-change">--</div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <div class="grid grid-2 fade-in-up">
+                <div class="chart-container">
+                    <div class="card-header">
+                        <h3 class="card-title">Network TPS (24h)</h3>
+                        <div class="status success">
+                            <div class="status-dot"></div>
+                            Live
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="tpsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="card-header">
+                        <h3 class="card-title">Gas Price Trends (24h)</h3>
+                        <div class="status success">
+                            <div class="status-dot"></div>
+                            Live
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="gasPriceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title">Block Production Rate (24h)</h3>
+                    <div class="status success">
+                        <div class="status-dot"></div>
+                        Healthy
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="blockChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Network Details -->
+            <div class="grid grid-3 fade-in-up">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Network Stats</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="mb-2">
+                            <strong>Total Transactions:</strong> 
+                            <span id="total-transactions">--</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Average Block Time:</strong> 
+                            <span id="avg-block-time">--</span>s
+                        </div>
+                        <div class="mb-2">
+                            <strong>Network Hashrate:</strong> 
+                            <span id="network-hashrate">--</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Total Supply:</strong> 
+                            <span id="total-supply">--</span> MON
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Blocks</h3>
+                    </div>
+                    <div class="card-content" id="recent-blocks">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading recent blocks...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Network Health</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="mb-2">
+                            <strong>Status:</strong> 
+                            <span class="status success">
+                                <div class="status-dot"></div>
+                                Healthy
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Uptime:</strong> 
+                            <span class="text-success">99.98%</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Consensus:</strong> 
+                            <span class="text-success">Active</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Last Update:</strong> 
+                            <span id="last-update">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title">Quick Actions</h3>
+                </div>
+                <div class="card-content">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a href="/transactions" class="btn btn-primary">View Transactions</a>
+                        <a href="/validators" class="btn btn-secondary">Validator List</a>
+                        <a href="/dapps" class="btn btn-secondary">dApp Analytics</a>
+                        <a href="/network" class="btn btn-secondary">Network Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script>
+        let refreshInterval;
+        let tpsChart, gasPriceChart, blockChart;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            initializeCharts();
+            await loadDashboardData();
+            setupAutoRefresh();
+        });
+
+        function initializeCharts() {
+            // TPS Chart
+            const tpsCtx = document.getElementById('tpsChart').getContext('2d');
+            tpsChart = new Chart(tpsCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'TPS',
+                        data: [],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Gas Price Chart
+            const gasCtx = document.getElementById('gasPriceChart').getContext('2d');
+            gasPriceChart = new Chart(gasCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Gas Price (gwei)',
+                        data: [],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Block Chart
+            const blockCtx = document.getElementById('blockChart').getContext('2d');
+            blockChart = new Chart(blockCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Block Height',
+                        data: [],
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: '#10b981',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        async function loadDashboardData() {
+            try {
+                const [networkStats, networkHistory] = await Promise.all([
+                    api.getNetworkStats(),
+                    api.getNetworkHistory(24)
+                ]);
+
+                // Update metrics
+                if (networkStats) {
+                    updateMetrics(networkStats);
+                    updateNetworkDetails(networkStats);
+                }
+
+                // Update charts
+                if (networkHistory && networkHistory.length > 0) {
+                    updateCharts(networkHistory);
+                }
+
+                // Update recent blocks
+                updateRecentBlocks(networkHistory.slice(-10));
+
+                // Update timestamp
+                document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        function updateMetrics(stats) {
+            document.getElementById('current-tps').textContent = stats.tps?.toLocaleString() || '--';
+            document.getElementById('block-height').textContent = stats.blockHeight?.toLocaleString() || '--';
+            document.getElementById('gas-price').textContent = stats.gasPrice || '--';
+            document.getElementById('active-validators').textContent = stats.activeValidators || '--';
+        }
+
+        function updateNetworkDetails(stats) {
+            document.getElementById('total-transactions').textContent = stats.totalTransactions?.toLocaleString() || '--';
+            document.getElementById('avg-block-time').textContent = stats.avgBlockTime || '--';
+            document.getElementById('network-hashrate').textContent = stats.networkHashrate || '--';
+            document.getElementById('total-supply').textContent = parseInt(stats.totalSupply || 0).toLocaleString();
+        }
+
+        function updateCharts(history) {
+            const labels = history.map(item => new Date(item.timestamp).toLocaleTimeString());
+            const tpsData = history.map(item => item.tps);
+            const gasPriceData = history.map(item => item.gasPrice);
+            const blockData = history.map(item => item.blockHeight);
+
+            // Update TPS chart
+            tpsChart.data.labels = labels;
+            tpsChart.data.datasets[0].data = tpsData;
+            tpsChart.update();
+
+            // Update Gas Price chart
+            gasPriceChart.data.labels = labels;
+            gasPriceChart.data.datasets[0].data = gasPriceData;
+            gasPriceChart.update();
+
+            // Update Block chart
+            blockChart.data.labels = labels.slice(-20); // Last 20 points
+            blockChart.data.datasets[0].data = blockData.slice(-20);
+            blockChart.update();
+        }
+
+        function updateRecentBlocks(blocks) {
+            const container = document.getElementById('recent-blocks');
+            if (blocks && blocks.length > 0) {
+                container.innerHTML = blocks.reverse().map(block => `
+                    <div style="padding: 0.5rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 500;">Block #${block.blockHeight?.toLocaleString()}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${new Date(block.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 500;">${block.tps} TPS</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${block.avgBlockTime}s</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">No recent blocks</p>';
+            }
+        }
+
+        function setupAutoRefresh() {
+            refreshInterval = setInterval(async () => {
+                await loadDashboardData();
+            }, 10000); // Refresh every 10 seconds
+        }
+
+        function showError(message) {
+            const metricsContainer = document.getElementById('dashboard-metrics');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            metricsContainer.parentNode.insertBefore(errorDiv, metricsContainer);
+        }
+
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-toggle').addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

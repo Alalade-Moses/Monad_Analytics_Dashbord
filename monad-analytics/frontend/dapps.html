@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dApps - Monad Analytics</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="/assets/monad-favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">M</div>
+                Monad Analytics
+            </a>
+            <button class="mobile-menu-toggle">☰</button>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/transactions">Transactions</a></li>
+                <li><a href="/validators">Validators</a></li>
+                <li><a href="/dapps" class="active">dApps</a></li>
+                <li><a href="/network">Network</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="mb-3">
+                <h1>dApp Ecosystem</h1>
+                <p class="text-muted">Decentralized applications building on Monad</p>
+            </div>
+
+            <!-- dApp Stats -->
+            <section class="metrics-grid fade-in-up">
+                <div class="metric-card">
+                    <div class="metric-value" id="total-dapps">--</div>
+                    <div class="metric-label">Total dApps</div>
+                    <div class="metric-change positive">+5 this month</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="total-tvl">--</div>
+                    <div class="metric-label">Total TVL</div>
+                    <div class="metric-change positive">+15.2% this week</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="total-volume">--</div>
+                    <div class="metric-label">24h Volume</div>
+                    <div class="metric-change positive">+8.7% today</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="active-users">--</div>
+                    <div class="metric-label">Active Users (24h)</div>
+                    <div class="metric-change positive">+12.3% today</div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <div class="grid grid-2 fade-in-up">
+                <div class="chart-container">
+                    <div class="card-header">
+                        <h3 class="card-title">TVL by Category</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="tvlCategoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="card-header">
+                        <h3 class="card-title">Top dApps by Volume (24h)</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title">Filter by Category</h3>
+                </div>
+                <div class="card-content">
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                        <button class="btn btn-primary category-btn active" data-category="">All Categories</button>
+                        <button class="btn btn-secondary category-btn" data-category="DeFi">DeFi</button>
+                        <button class="btn btn-secondary category-btn" data-category="Gaming">Gaming</button>
+                        <button class="btn btn-secondary category-btn" data-category="NFT">NFT</button>
+                        <button class="btn btn-secondary category-btn" data-category="Infrastructure">Infrastructure</button>
+                        <button class="btn btn-secondary category-btn" data-category="Social">Social</button>
+                        <button class="btn btn-secondary category-btn" data-category="Other">Other</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- dApps Grid -->
+            <div class="grid grid-3 fade-in-up" id="dapps-grid">
+                <div class="loading" style="grid-column: 1 / -1;">
+                    <div class="spinner"></div>
+                    Loading dApps...
+                </div>
+            </div>
+
+            <!-- dApp Details Modal -->
+            <div id="dapp-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; padding: 2rem;">
+                <div style="max-width: 800px; margin: 0 auto; background: var(--surface); border-radius: 12px; padding: 2rem; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h3>dApp Details</h3>
+                        <button onclick="closeDappModal()" style="background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div id="dapp-details">
+                        <!-- dApp details will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script>
+        let dapps = [];
+        let filteredDapps = [];
+        let tvlChart, volumeChart;
+        let refreshInterval;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initializeCharts();
+            await loadDapps();
+            setupEventListeners();
+            setupAutoRefresh();
+        });
+
+        function initializeCharts() {
+            // TVL by Category Chart
+            const tvlCtx = document.getElementById('tvlCategoryChart').getContext('2d');
+            tvlChart = new Chart(tvlCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            '#6366f1', '#8b5cf6', '#10b981', '#f59e0b', 
+                            '#ef4444', '#06b6d4', '#84cc16'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#cbd5e1' }
+                        }
+                    }
+                }
+            });
+
+            // Volume Chart
+            const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+            volumeChart = new Chart(volumeCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '24h Volume ($)',
+                        data: [],
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: '#10b981',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { 
+                                color: '#9ca3af',
+                                callback: function(value) {
+                                    return '$' + (value / 1000000).toFixed(1) + 'M';
+                                }
+                            }
+                        },
+                        x: { 
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadDapps() {
+            try {
+                const dappData = await api.getDapps();
+                dapps = dappData || [];
+                filteredDapps = [...dapps];
+                
+                updateStats();
+                updateCharts();
+                displayDapps();
+                
+            } catch (error) {
+                console.error('Error loading dApps:', error);
+                showError('Failed to load dApps');
+            }
+        }
+
+        function updateStats() {
+            if (dapps.length === 0) return;
+
+            const totalTvl = dapps.reduce((sum, dapp) => sum + dapp.tvl, 0);
+            const totalVolume = dapps.reduce((sum, dapp) => sum + dapp.volume24h, 0);
+            const totalUsers = dapps.reduce((sum, dapp) => sum + dapp.users24h, 0);
+
+            document.getElementById('total-dapps').textContent = dapps.length;
+            document.getElementById('total-tvl').textContent = '$' + (totalTvl / 1000000).toFixed(1) + 'M';
+            document.getElementById('total-volume').textContent = '$' + (totalVolume / 1000000).toFixed(1) + 'M';
+            document.getElementById('active-users').textContent = totalUsers.toLocaleString();
+        }
+
+        function updateCharts() {
+            if (dapps.length === 0) return;
+
+            // Update TVL by category chart
+            const categoryTvl = {};
+            dapps.forEach(dapp => {
+                if (!categoryTvl[dapp.category]) {
+                    categoryTvl[dapp.category] = 0;
+                }
+                categoryTvl[dapp.category] += dapp.tvl;
+            });
+
+            tvlChart.data.labels = Object.keys(categoryTvl);
+            tvlChart.data.datasets[0].data = Object.values(categoryTvl);
+            tvlChart.update();
+
+            // Update volume chart (top 6 dApps by volume)
+            const topDappsByVolume = [...dapps].sort((a, b) => b.volume24h - a.volume24h).slice(0, 6);
+            volumeChart.data.labels = topDappsByVolume.map(dapp => dapp.name);
+            volumeChart.data.datasets[0].data = topDappsByVolume.map(dapp => dapp.volume24h);
+            volumeChart.update();
+        }
+
+        function displayDapps() {
+            const grid = document.getElementById('dapps-grid');
+            
+            if (filteredDapps.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">No dApps found</div>';
+                return;
+            }
+
+            grid.innerHTML = filteredDapps.map(dapp => `
+                <div class="card" style="cursor: pointer;" onclick="showDappDetails('${dapp.contractAddress}')">
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <div style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
+                            ${dapp.name.charAt(0)}
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.1rem;">${dapp.name}</h4>
+                            <span class="status ${dapp.isActive ? 'success' : 'error'}" style="font-size: 0.75rem;">
+                                <div class="status-dot"></div>
+                                ${dapp.category}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <p style="color: var(--text-muted); font-size: 0.875rem; line-height: 1.4;">
+                            ${dapp.description || 'No description available'}
+                        </p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">TVL</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">$${(dapp.tvl / 1000000).toFixed(2)}M</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">24h Volume</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">$${(dapp.volume24h / 1000).toFixed(0)}K</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Users (24h)</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">${dapp.users24h.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Txns (24h)</div>
+                            <div style="font-weight: 600; color: var(--text-primary);">${dapp.transactions24h.toLocaleString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showDappDetails(contractAddress) {
+            const dapp = dapps.find(d => d.contractAddress === contractAddress);
+            if (!dapp) return;
+
+            const modal = document.getElementById('dapp-modal');
+            const details = document.getElementById('dapp-details');
+            
+            const rank = dapps.sort((a, b) => b.tvl - a.tvl).findIndex(d => d.contractAddress === contractAddress) + 1;
+            
+            details.innerHTML = `
+                <div style="display: grid; gap: 2rem;">
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem; margin-right: 1.5rem;">
+                            ${dapp.name.charAt(0)}
+                        </div>
+                        <div>
+                            <h2 style="margin: 0 0 0.5rem 0;">${dapp.name}</h2>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <span class="status ${dapp.isActive ? 'success' : 'error'}">
+                                    <div class="status-dot"></div>
+                                    ${dapp.category}
+                                </span>
+                                <span style="color: var(--text-muted);">Rank #${rank}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="margin-bottom: 1rem;">Description</h4>
+                        <p style="color: var(--text-secondary); line-height: 1.6;">
+                            ${dapp.description || 'No description available for this dApp.'}
+                        </p>
+                    </div>
+
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 style="margin-bottom: 1rem;">Key Metrics</h4>
+                            <div style="display: grid; gap: 1rem;">
+                                <div>
+                                    <strong>Total Value Locked:</strong>
+                                    <div style="font-size: 1.2rem; color: var(--primary-color); font-weight: 600;">
+                                        $${(dapp.tvl / 1000000).toFixed(2)}M
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong>24h Volume:</strong>
+                                    <div style="font-size: 1.1rem; color: var(--success-color); font-weight: 600;">
+                                        $${(dapp.volume24h / 1000000).toFixed(2)}M
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong>Active Users (24h):</strong>
+                                    <div style="font-weight: 600;">${dapp.users24h.toLocaleString()}</div>
+                                </div>
+                                <div>
+                                    <strong>Transactions (24h):</strong>
+                                    <div style="font-weight: 600;">${dapp.transactions24h.toLocaleString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 1rem;">Contract Details</h4>
+                            <div style="display: grid; gap: 1rem;">
+                                <div>
+                                    <strong>Contract Address:</strong>
+                                    <div style="font-family: monospace; background: var(--surface-light); padding: 0.5rem; border-radius: 4px; margin-top: 0.25rem; word-break: break-all; font-size: 0.875rem;">
+                                        ${dapp.contractAddress}
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong>Website:</strong>
+                                    <div>
+                                        ${dapp.website ? `<a href="${dapp.website}" target="_blank" style="color: var(--primary-color); text-decoration: none;">${dapp.website}</a>` : 'Not available'}
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong>Category:</strong>
+                                    <div>${dapp.category}</div>
+                                </div>
+                                <div>
+                                    <strong>Status:</strong>
+                                    <span class="status ${dapp.isActive ? 'success' : 'error'}">
+                                        <div class="status-dot"></div>
+                                        ${dapp.isActive ? 'Active' : 'Inactive'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; padding-top: 1rem; border-top: 1px solid var(--border);">
+                        ${dapp.website ? `<a href="${dapp.website}" target="_blank" class="btn btn-primary">Visit dApp</a>` : ''}
+                        <button onclick="closeDappModal()" class="btn btn-secondary">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeDappModal() {
+            document.getElementById('dapp-modal').style.display = 'none';
+        }
+
+        function setupEventListeners() {
+            // Category filter buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const category = e.target.dataset.category;
+                    
+                    // Update active button
+                    document.querySelectorAll('.category-btn').forEach(b => {
+                        b.classList.remove('btn-primary', 'active');
+                        b.classList.add('btn-secondary');
+                    });
+                    e.target.classList.remove('btn-secondary');
+                    e.target.classList.add('btn-primary', 'active');
+                    
+                    // Filter dApps
+                    if (category === '') {
+                        filteredDapps = [...dapps];
+                    } else {
+                        filteredDapps = dapps.filter(dapp => dapp.category === category);
+                    }
+                    
+                    displayDapps();
+                });
+            });
+        }
+
+        function setupAutoRefresh() {
+            refreshInterval = setInterval(async () => {
+                await loadDapps();
+            }, 60000); // Refresh every minute
+        }
+
+        function showError(message) {
+            const grid = document.getElementById('dapps-grid');
+            grid.innerHTML = `<div style="grid-column: 1 / -1;" class="error-message">${message}</div>`;
+        }
+
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-toggle').addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Close modal on outside click
+        document.getElementById('dapp-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'dapp-modal') {
+                closeDappModal();
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

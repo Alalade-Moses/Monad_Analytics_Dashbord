@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Health - Monad Analytics</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="/assets/monad-favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">M</div>
+                Monad Analytics
+            </a>
+            <button class="mobile-menu-toggle">☰</button>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/transactions">Transactions</a></li>
+                <li><a href="/validators">Validators</a></li>
+                <li><a href="/dapps">dApps</a></li>
+                <li><a href="/network" class="active">Network</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="mb-3">
+                <h1>Network Health</h1>
+                <p class="text-muted">Real-time monitoring of Monad network status and performance</p>
+            </div>
+
+            <!-- Network Status Overview -->
+            <section class="card fade-in-up" style="margin-bottom: 2rem;">
+                <div class="card-header">
+                    <h3 class="card-title">Network Status</h3>
+                    <div class="status success" id="network-status">
+                        <div class="status-dot"></div>
+                        All Systems Operational
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="grid grid-3">
+                        <div class="text-center">
+                            <div style="font-size: 2rem; color: var(--success-color); margin-bottom: 0.5rem;">✓</div>
+                            <div style="font-weight: 600;">Consensus</div>
+                            <div style="color: var(--text-muted); font-size: 0.875rem;">Active & Healthy</div>
+                        </div>
+                        <div class="text-center">
+                            <div style="font-size: 2rem; color: var(--success-color); margin-bottom: 0.5rem;">✓</div>
+                            <div style="font-weight: 600;">Block Production</div>
+                            <div style="color: var(--text-muted); font-size: 0.875rem;">On Schedule</div>
+                        </div>
+                        <div class="text-center">
+                            <div style="font-size: 2rem; color: var(--success-color); margin-bottom: 0.5rem;">✓</div>
+                            <div style="font-weight: 600;">Network Sync</div>
+                            <div style="color: var(--text-muted); font-size: 0.875rem;">Fully Synced</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Key Network Metrics -->
+            <section class="metrics-grid fade-in-up">
+                <div class="metric-card">
+                    <div class="metric-value" id="network-uptime">--</div>
+                    <div class="metric-label">Network Uptime</div>
+                    <div class="metric-change positive">30 days</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avg-block-time">--</div>
+                    <div class="metric-label">Avg Block Time</div>
+                    <div class="metric-change">seconds</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="network-hashrate">--</div>
+                    <div class="metric-label">Network Hashrate</div>
+                    <div class="metric-change positive">+2.3% today</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="finality-time">--</div>
+                    <div class="metric-label">Finality Time</div>
+                    <div class="metric-change">seconds</div>
+                </div>
+            </section>
+
+            <!-- Performance Charts -->
+            <div class="grid grid-2 fade-in-up">
+                <div class="chart-container">
+                    <div class="card-header">
+                        <h3 class="card-title">Block Time Trend (24h)</h3>
+                        <div class="status success">
+                            <div class="status-dot"></div>
+                            Stable
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="blockTimeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="card-header">
+                        <h3 class="card-title">Network TPS (24h)</h3>
+                        <div class="status success">
+                            <div class="status-dot"></div>
+                            Healthy
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="networkTpsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Network Info -->
+            <div class="grid grid-2 fade-in-up">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Blockchain Information</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="mb-2">
+                            <strong>Current Block Height:</strong> 
+                            <span id="current-block">--</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Total Transactions:</strong> 
+                            <span id="total-transactions">--</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Network Version:</strong> 
+                            <span>v1.2.0</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Protocol:</strong> 
+                            <span>Proof of Stake</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Chain ID:</strong> 
+                            <span>34443</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Genesis Time:</strong> 
+                            <span>2024-01-15 12:00:00 UTC</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Validator Network</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="mb-2">
+                            <strong>Active Validators:</strong> 
+                            <span id="active-validators">--</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Validator Participation:</strong> 
+                            <span class="text-success">99.8%</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Slashing Events (30d):</strong> 
+                            <span class="text-success">0</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Min Validator Stake:</strong> 
+                            <span>1,000,000 MON</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Staking APR:</strong> 
+                            <span class="text-primary">8.2%</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Unbonding Period:</strong> 
+                            <span>7 days</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 fade-in-up">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Network Economics</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="mb-2">
+                            <strong>Total Supply:</strong> 
+                            <span id="total-supply">--</span> MON
+                        </div>
+                        <div class="mb-2">
+                            <strong>Circulating Supply:</strong> 
+                            <span id="circulating-supply">--</span> MON
+                        </div>
+                        <div class="mb-2">
+                            <strong>Staked Amount:</strong> 
+                            <span id="staked-amount">--</span> MON
+                        </div>
+                        <div class="mb-2">
+                            <strong>Staking Ratio:</strong> 
+                            <span class="text-primary">68.5%</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Current Gas Price:</strong> 
+                            <span id="current-gas-price">--</span> gwei
+                        </div>
+                        <div class="mb-2">
+                            <strong>Base Fee:</strong> 
+                            <span id="base-fee">--</span> gwei
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Network Activity</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="mb-2">
+                            <strong>Transactions (24h):</strong> 
+                            <span id="daily-transactions">--</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Active Addresses (24h):</strong> 
+                            <span id="active-addresses">--</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Transaction Success Rate:</strong> 
+                            <span class="text-success">99.7%</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Average Gas Used:</strong> 
+                            <span id="avg-gas-used">--</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Network Congestion:</strong> 
+                            <span class="text-success">Low</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Mempool Size:</strong> 
+                            <span id="mempool-size">--</span> txns
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Alerts -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title">System Status & Alerts</h3>
+                </div>
+                <div class="card-content">
+                    <div id="system-alerts">
+                        <div style="display: flex; align-items: center; padding: 1rem; background: var(--success-color)20; border: 1px solid var(--success-color); border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="color: var(--success-color); margin-right: 1rem; font-size: 1.2rem;">✓</div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--success-color);">All Systems Operational</div>
+                                <div style="color: var(--text-secondary); font-size: 0.875rem;">Network is running smoothly with no active incidents.</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; padding: 1rem; background: var(--surface-light); border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="color: var(--text-muted); margin-right: 1rem; font-size: 1.2rem;">ℹ</div>
+                            <div>
+                                <div style="font-weight: 600;">Scheduled Maintenance</div>
+                                <div style="color: var(--text-secondary); font-size: 0.875rem;">Next scheduled maintenance window: December 15, 2024 at 02:00 UTC</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script>
+        let blockTimeChart, networkTpsChart;
+        let refreshInterval;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initializeCharts();
+            await loadNetworkData();
+            setupAutoRefresh();
+        });
+
+        function initializeCharts() {
+            // Block Time Chart
+            const blockTimeCtx = document.getElementById('blockTimeChart').getContext('2d');
+            blockTimeChart = new Chart(blockTimeCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Block Time (s)',
+                        data: [],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: { 
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+
+            // Network TPS Chart
+            const tpsCtx = document.getElementById('networkTpsChart').getContext('2d');
+            networkTpsChart = new Chart(tpsCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'TPS',
+                        data: [],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: { 
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadNetworkData() {
+            try {
+                const [networkStats, networkHistory] = await Promise.all([
+                    api.getNetworkStats(),
+                    api.getNetworkHistory(24)
+                ]);
+
+                if (networkStats) {
+                    updateNetworkInfo(networkStats);
+                }
+
+                if (networkHistory && networkHistory.length > 0) {
+                    updateCharts(networkHistory);
+                }
+
+            } catch (error) {
+                console.error('Error loading network data:', error);
+                showError('Failed to load network data');
+            }
+        }
+
+        function updateNetworkInfo(stats) {
+            // Network metrics
+            document.getElementById('network-uptime').textContent = '99.98%';
+            document.getElementById('avg-block-time').textContent = stats.avgBlockTime || '--';
+            document.getElementById('network-hashrate').textContent = stats.networkHashrate || '--';
+            document.getElementById('finality-time').textContent = '2.1';
+
+            // Blockchain info
+            document.getElementById('current-block').textContent = stats.blockHeight?.toLocaleString() || '--';
+            document.getElementById('total-transactions').textContent = stats.totalTransactions?.toLocaleString() || '--';
+            document.getElementById('active-validators').textContent = stats.activeValidators || '--';
+
+            // Economics
+            document.getElementById('total-supply').textContent = parseInt(stats.totalSupply || 0).toLocaleString();
+            document.getElementById('circulating-supply').textContent = Math.floor(parseInt(stats.totalSupply || 0) * 0.85).toLocaleString();
+            document.getElementById('staked-amount').textContent = Math.floor(parseInt(stats.totalSupply || 0) * 0.685).toLocaleString();
+            document.getElementById('current-gas-price').textContent = stats.gasPrice || '--';
+            document.getElementById('base-fee').textContent = Math.max(1, (stats.gasPrice || 0) - 2);
+
+            // Activity
+            document.getElementById('daily-transactions').textContent = Math.floor((stats.totalTransactions || 0) * 0.001).toLocaleString();
+            document.getElementById('active-addresses').textContent = Math.floor((stats.totalTransactions || 0) * 0.0001).toLocaleString();
+            document.getElementById('avg-gas-used').textContent = '65,432';
+            document.getElementById('mempool-size').textContent = Math.floor(Math.random() * 500) + 100;
+        }
+
+        function updateCharts(history) {
+            const labels = history.map(item => new Date(item.timestamp).toLocaleTimeString());
+            const blockTimes = history.map(item => parseFloat(item.avgBlockTime));
+            const tpsData = history.map(item => item.tps);
+
+            // Update block time chart
+            blockTimeChart.data.labels = labels;
+            blockTimeChart.data.datasets[0].data = blockTimes;
+            blockTimeChart.update();
+
+            // Update TPS chart
+            networkTpsChart.data.labels = labels;
+            networkTpsChart.data.datasets[0].data = tpsData;
+            networkTpsChart.update();
+        }
+
+        function setupAutoRefresh() {
+            refreshInterval = setInterval(async () => {
+                await loadNetworkData();
+            }, 15000); // Refresh every 15 seconds
+        }
+
+        function showError(message) {
+            const alertsContainer = document.getElementById('system-alerts');
+            alertsContainer.innerHTML = `
+                <div style="display: flex; align-items: center; padding: 1rem; background: var(--error-color)20; border: 1px solid var(--error-color); border-radius: 8px;">
+                    <div style="color: var(--error-color); margin-right: 1rem; font-size: 1.2rem;">⚠</div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--error-color);">Data Loading Error</div>
+                        <div style="color: var(--text-secondary); font-size: 0.875rem;">${message}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-toggle').addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

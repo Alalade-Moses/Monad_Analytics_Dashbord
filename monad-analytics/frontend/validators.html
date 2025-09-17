@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validators - Monad Analytics</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="/assets/monad-favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">M</div>
+                Monad Analytics
+            </a>
+            <button class="mobile-menu-toggle">☰</button>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/transactions">Transactions</a></li>
+                <li><a href="/validators" class="active">Validators</a></li>
+                <li><a href="/dapps">dApps</a></li>
+                <li><a href="/network">Network</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="mb-3">
+                <h1>Network Validators</h1>
+                <p class="text-muted">Active validators securing the Monad network</p>
+            </div>
+
+            <!-- Validator Stats -->
+            <section class="metrics-grid fade-in-up">
+                <div class="metric-card">
+                    <div class="metric-value" id="total-validators">--</div>
+                    <div class="metric-label">Total Validators</div>
+                    <div class="metric-change positive">+3 this week</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="total-stake">--</div>
+                    <div class="metric-label">Total Stake</div>
+                    <div class="metric-change positive">MON</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avg-uptime">--</div>
+                    <div class="metric-label">Average Uptime</div>
+                    <div class="metric-change positive">Last 30 days</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avg-commission">--</div>
+                    <div class="metric-label">Avg Commission</div>
+                    <div class="metric-change">Network average</div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <div class="grid grid-2 fade-in-up">
+                <div class="chart-container">
+                    <div class="card-header">
+                        <h3 class="card-title">Stake Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="stakeDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="card-header">
+                        <h3 class="card-title">Commission Rates</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="commissionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validators Table -->
+            <div class="table-container fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title">Validator List</h3>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <select id="sort-select" style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-light); color: var(--text-primary);">
+                            <option value="stake">Sort by Stake</option>
+                            <option value="uptime">Sort by Uptime</option>
+                            <option value="commission">Sort by Commission</option>
+                            <option value="blocks">Sort by Blocks</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="refreshValidators()">Refresh</button>
+                        <div class="status success">
+                            <div class="status-dot"></div>
+                            Live
+                        </div>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Validator</th>
+                                <th>Stake Amount</th>
+                                <th>Commission</th>
+                                <th>Uptime</th>
+                                <th>Blocks Proposed</th>
+                                <th>Blocks Validated</th>
+                                <th>Delegators</th>
+                                <th>APR</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="validators-table">
+                            <tr>
+                                <td colspan="10" class="loading">
+                                    <div class="spinner"></div>
+                                    Loading validators...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Validator Performance Overview -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <h3 class="card-title">Network Health Overview</h3>
+                </div>
+                <div class="card-content">
+                    <div class="grid grid-3">
+                        <div>
+                            <h4 class="mb-2">Consensus Participation</h4>
+                            <div class="mb-2">
+                                <strong>Active Consensus:</strong> 
+                                <span class="text-success">100%</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Block Production:</strong> 
+                                <span class="text-success">Healthy</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Finalization:</strong> 
+                                <span class="text-success">On-time</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="mb-2">Staking Metrics</h4>
+                            <div class="mb-2">
+                                <strong>Staking Ratio:</strong> 
+                                <span id="staking-ratio">--</span>%
+                            </div>
+                            <div class="mb-2">
+                                <strong>Min Stake:</strong> 
+                                <span id="min-stake">--</span> MON
+                            </div>
+                            <div class="mb-2">
+                                <strong>Max Stake:</strong> 
+                                <span id="max-stake">--</span> MON
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="mb-2">Validator Quality</h4>
+                            <div class="mb-2">
+                                <strong>High Performers:</strong> 
+                                <span id="high-performers">--</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Average APR:</strong> 
+                                <span id="average-apr">--</span>%
+                            </div>
+                            <div class="mb-2">
+                                <strong>Network Decentralization:</strong> 
+                                <span class="text-success">Excellent</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validator Details Modal -->
+            <div id="validator-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; padding: 2rem;">
+                <div style="max-width: 800px; margin: 0 auto; background: var(--surface); border-radius: 12px; padding: 2rem; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h3>Validator Details</h3>
+                        <button onclick="closeValidatorModal()" style="background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    </div>
+                    <div id="validator-details">
+                        <!-- Validator details will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/charts.js"></script>
+    <script>
+        let validators = [];
+        let stakeChart, commissionChart;
+        let refreshInterval;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initializeCharts();
+            await loadValidators();
+            setupEventListeners();
+            setupAutoRefresh();
+        });
+
+        function initializeCharts() {
+            // Stake Distribution Chart
+            const stakeCtx = document.getElementById('stakeDistributionChart').getContext('2d');
+            stakeChart = new Chart(stakeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            '#6366f1', '#8b5cf6', '#10b981', '#f59e0b', 
+                            '#ef4444', '#06b6d4', '#84cc16', '#f97316'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#cbd5e1' }
+                        }
+                    }
+                }
+            });
+
+            // Commission Chart
+            const commissionCtx = document.getElementById('commissionChart').getContext('2d');
+            commissionChart = new Chart(commissionCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Commission %',
+                        data: [],
+                        backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                        borderColor: '#8b5cf6',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: { 
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadValidators() {
+            try {
+                const validatorData = await api.getValidators();
+                validators = validatorData || [];
+                
+                updateStats();
+                updateCharts();
+                displayValidators();
+                
+            } catch (error) {
+                console.error('Error loading validators:', error);
+                showError('Failed to load validators');
+            }
+        }
+
+        function updateStats() {
+            if (validators.length === 0) return;
+
+            const totalStake = validators.reduce((sum, v) => sum + parseInt(v.stake), 0);
+            const avgUptime = validators.reduce((sum, v) => sum + parseFloat(v.uptime), 0) / validators.length;
+            const avgCommission = validators.reduce((sum, v) => sum + parseFloat(v.commission), 0) / validators.length;
+            const avgApr = validators.reduce((sum, v) => sum + parseFloat(v.apr), 0) / validators.length;
+            const highPerformers = validators.filter(v => parseFloat(v.uptime) >= 99).length;
+            const minStake = Math.min(...validators.map(v => parseInt(v.stake)));
+            const maxStake = Math.max(...validators.map(v => parseInt(v.stake)));
+
+            document.getElementById('total-validators').textContent = validators.length;
+            document.getElementById('total-stake').textContent = (totalStake / 1000000).toFixed(1) + 'M';
+            document.getElementById('avg-uptime').textContent = avgUptime.toFixed(2) + '%';
+            document.getElementById('avg-commission').textContent = avgCommission.toFixed(1) + '%';
+            
+            document.getElementById('staking-ratio').textContent = '68.5'; // Mock data
+            document.getElementById('min-stake').textContent = (minStake / 1000000).toFixed(1) + 'M';
+            document.getElementById('max-stake').textContent = (maxStake / 1000000).toFixed(1) + 'M';
+            document.getElementById('high-performers').textContent = highPerformers;
+            document.getElementById('average-apr').textContent = avgApr.toFixed(1);
+        }
+
+        function updateCharts() {
+            if (validators.length === 0) return;
+
+            // Update stake distribution chart (top 8 validators)
+            const topValidators = validators.slice(0, 8);
+            stakeChart.data.labels = topValidators.map(v => v.name);
+            stakeChart.data.datasets[0].data = topValidators.map(v => parseInt(v.stake) / 1000000);
+            stakeChart.update();
+
+            // Update commission chart
+            commissionChart.data.labels = topValidators.map(v => v.name);
+            commissionChart.data.datasets[0].data = topValidators.map(v => parseFloat(v.commission));
+            commissionChart.update();
+        }
+
+        function displayValidators() {
+            const tbody = document.getElementById('validators-table');
+            
+            if (validators.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 2rem;">No validators found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = validators.map((validator, index) => `
+                <tr style="cursor: pointer;" onclick="showValidatorDetails('${validator.address}')">
+                    <td><strong>#${index + 1}</strong></td>
+                    <td>
+                        <div>
+                            <div style="font-weight: 600;">${validator.name}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">
+                                ${api.formatHash(validator.address, 8, 6)}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>${(parseInt(validator.stake) / 1000000).toFixed(2)}M MON</strong>
+                        </div>
+                    </td>
+                    <td>${validator.commission}%</td>
+                    <td>
+                        <span class="status ${parseFloat(validator.uptime) >= 99 ? 'success' : parseFloat(validator.uptime) >= 95 ? 'warning' : 'error'}">
+                            <div class="status-dot"></div>
+                            ${validator.uptime}%
+                        </span>
+                    </td>
+                    <td>${validator.blocksProposed?.toLocaleString()}</td>
+                    <td>${validator.blocksValidated?.toLocaleString()}</td>
+                    <td>${validator.delegators}</td>
+                    <td>${validator.apr}%</td>
+                    <td>
+                        <span class="status ${validator.isActive ? 'success' : 'error'}">
+                            <div class="status-dot"></div>
+                            ${validator.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showValidatorDetails(address) {
+            const validator = validators.find(v => v.address === address);
+            if (!validator) return;
+
+            const modal = document.getElementById('validator-modal');
+            const details = document.getElementById('validator-details');
+            
+            details.innerHTML = `
+                <div style="display: grid; gap: 2rem;">
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 class="mb-2">Basic Information</h4>
+                            <div class="mb-2">
+                                <strong>Name:</strong> ${validator.name}
+                            </div>
+                            <div class="mb-2">
+                                <strong>Address:</strong>
+                                <div style="font-family: monospace; background: var(--surface-light); padding: 0.5rem; border-radius: 4px; margin-top: 0.25rem; word-break: break-all;">
+                                    ${validator.address}
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Status:</strong>
+                                <span class="status ${validator.isActive ? 'success' : 'error'}">
+                                    <div class="status-dot"></div>
+                                    ${validator.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="mb-2">Staking Details</h4>
+                            <div class="mb-2">
+                                <strong>Total Stake:</strong> 
+                                ${(parseInt(validator.stake) / 1000000).toFixed(2)}M MON
+                            </div>
+                            <div class="mb-2">
+                                <strong>Commission Rate:</strong> 
+                                ${validator.commission}%
+                            </div>
+                            <div class="mb-2">
+                                <strong>APR:</strong> 
+                                ${validator.apr}%
+                            </div>
+                            <div class="mb-2">
+                                <strong>Delegators:</strong> 
+                                ${validator.delegators}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 class="mb-2">Performance Metrics</h4>
+                            <div class="mb-2">
+                                <strong>Uptime:</strong> 
+                                <span class="status ${parseFloat(validator.uptime) >= 99 ? 'success' : parseFloat(validator.uptime) >= 95 ? 'warning' : 'error'}">
+                                    <div class="status-dot"></div>
+                                    ${validator.uptime}%
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Blocks Proposed:</strong> 
+                                ${validator.blocksProposed?.toLocaleString()}
+                            </div>
+                            <div class="mb-2">
+                                <strong>Blocks Validated:</strong> 
+                                ${validator.blocksValidated?.toLocaleString()}
+                            </div>
+                            <div class="mb-2">
+                                <strong>Last Seen:</strong> 
+                                ${api.formatTimestamp(validator.lastSeen)}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="mb-2">Rankings</h4>
+                            <div class="mb-2">
+                                <strong>Stake Rank:</strong> 
+                                #${validators.findIndex(v => v.address === address) + 1}
+                            </div>
+                            <div class="mb-2">
+                                <strong>Performance Score:</strong> 
+                                <span class="text-success">${(parseFloat(validator.uptime) * 0.6 + (100 - parseFloat(validator.commission)) * 0.4).toFixed(1)}/100</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Network Share:</strong> 
+                                ${((parseInt(validator.stake) / validators.reduce((sum, v) => sum + parseInt(v.stake), 0)) * 100).toFixed(2)}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeValidatorModal() {
+            document.getElementById('validator-modal').style.display = 'none';
+        }
+
+        function setupEventListeners() {
+            // Sort functionality
+            document.getElementById('sort-select').addEventListener('change', (e) => {
+                const sortBy = e.target.value;
+                sortValidators(sortBy);
+            });
+        }
+
+        function sortValidators(sortBy) {
+            switch (sortBy) {
+                case 'stake':
+                    validators.sort((a, b) => parseInt(b.stake) - parseInt(a.stake));
+                    break;
+                case 'uptime':
+                    validators.sort((a, b) => parseFloat(b.uptime) - parseFloat(a.uptime));
+                    break;
+                case 'commission':
+                    validators.sort((a, b) => parseFloat(a.commission) - parseFloat(b.commission));
+                    break;
+                case 'blocks':
+                    validators.sort((a, b) => b.blocksProposed - a.blocksProposed);
+                    break;
+                default:
+                    validators.sort((a, b) => parseInt(b.stake) - parseInt(a.stake));
+            }
+            displayValidators();
+        }
+
+        async function refreshValidators() {
+            await loadValidators();
+        }
+
+        function setupAutoRefresh() {
+            refreshInterval = setInterval(async () => {
+                await loadValidators();
+            }, 30000); // Refresh every 30 seconds
+        }
+
+        function showError(message) {
+            const tbody = document.getElementById('validators-table');
+            tbody.innerHTML = `<tr><td colspan="10" class="error-message">${message}</td></tr>`;
+        }
+
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-toggle').addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Close modal on outside click
+        document.getElementById('validator-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'validator-modal') {
+                closeValidatorModal();
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
