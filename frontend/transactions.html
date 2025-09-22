@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -61,98 +61,103 @@
             <!-- Search and Filters -->
             <div class="card fade-in-up">
                 <div class="card-header">
-                    <h3 class="card-title">Search & Filter</h3>
-                    <button class="btn btn-secondary" onclick="clearFilters()">Clear All</button>
-                </div>
-                <div class="card-content">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                        <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Search by Hash/Address</label>
-                            <input type="text" id="search-input" placeholder="Enter transaction hash or address..." 
-                                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-light); color: var(--text-primary);">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Status</label>
-                            <select id="status-filter" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-light); color: var(--text-primary);">
-                                <option value="">All Statuses</option>
-                                <option value="success">Success</option>
-                                <option value="failed">Failed</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Transaction Type</label>
-                            <select id="type-filter" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-light); color: var(--text-primary);">
-                                <option value="">All Types</option>
-                                <option value="transfer">Transfer</option>
-                                <option value="contract">Contract</option>
-                            </select>
-                        </div>
-                        <div style="display: flex; align-items: end;">
-                            <button class="btn btn-primary" onclick="applyFilters()" style="width: 100%;">Apply Filters</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <h3 class="card-title">PASTE YOUR WALLET ADDRESS HERE</h3>
+    <button id="clearBtn" class="btn btn-secondary">Clear All</button>
+</div>
+<div class="card-content">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div>
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Search by Hash/Address</label>
+            <input type="text" id="wallet-address" placeholder="Enter your wallet hash or address..." required
 
-            <!-- Transactions Table -->
-            <div class="table-container fade-in-up">
-                <div class="card-header">
-                    <h3 class="card-title">Recent Transactions</h3>
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary" onclick="refreshTransactions()">Refresh</button>
-                        <div class="status success">
-                            <div class="status-dot"></div>
-                            Auto-updating
-                        </div>
-                    </div>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Hash</th>
-                                <th>Block</th>
-                                <th>From</th>
-                                <th>To</th>
-                                <th>Value (MON)</th>
-                                <th>Fee</th>
-                                <th>Gas Used</th>
-                                <th>Status</th>
-                                <th>Time</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactions-table">
-                            <tr>
-                                <td colspan="9" class="loading">
-                                    <div class="spinner"></div>
-                                    Loading transactions...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-light); color: var(--text-primary);">
+        </div>
+        <div>
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Status</label>
+            <select id="status-filter" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-light); color: var(--text-primary);">
+                <option value="">All Statuses</option>
+                <option value="success">Success</option>
+                <option value="failed">Failed</option>
+            </select>
+        </div>
+        <div>
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Transaction Type</label>
+            <select id="type-filter" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-light); color: var(--text-primary);">
+                <option value="">All Types</option>
+                <option value="transfer">Transfer</option>
+                <option value="contract">Contract</option>
+            </select>
+        </div>
+        <div style="display: flex; align-items: end;">
+            <button id="searchBtn" class="btn btn-primary" style="width: 100%;">SEARCH FILTERS</button>
+        </div>
+    </div>
+</div>
+
+ <!-- Transactions Section -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title" id="table-title">Recent Transactions</h3>
+    <div class="actions">
+      <button id="refreshBtn" class="btn btn-secondary">Refresh</button>
+      <div class="status success">
+        <div class="status-dot"></div>
+        Auto-updating
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="table responsive-table">
+      <thead>
+        <tr>
+          <th>Hash</th>
+          <th>Block</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Value (MON)</th>
+          <th>Fee</th>
+          <th>Gas Used</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="transactions-table">
+        <tr>
+          <td colspan="9" class="loading">
+            <div class="spinner"></div>
+            Loading transactions...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
             <!-- Load More -->
-            <div class="text-center mt-3">
-                <button class="btn btn-secondary" id="load-more-btn" onclick="loadMoreTransactions()" style="display: none;">
-                    Load More Transactions
-                </button>
-            </div>
+             <button class="btn btn-secondary" id="load-more-btn" style="display: none;">
+              Load More Transactions
+              </button>
+
 
             <!-- Transaction Details Modal (Simple) -->
-            <div id="transaction-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; padding: 2rem;">
-                <div style="max-width: 600px; margin: 0 auto; background: var(--surface); border-radius: 12px; padding: 2rem; max-height: 80vh; overflow-y: auto;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                        <h3>Transaction Details</h3>
-                        <button onclick="closeTransactionModal()" style="background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer;">&times;</button>
-                    </div>
-                    <div id="transaction-details">
-                        <!-- Transaction details will be populated here -->
-                    </div>
-                </div>
-            </div>
+            <div id="transaction-modal" 
+     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; padding: 2rem;">
+    <div class="transaction-content"
+         style="max-width: 600px; margin: 0 auto; background: var(--surface); border-radius: 12px; padding: 2rem; max-height: 80vh; overflow-y: auto;">
+         
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3>Transaction Details</h3>
+            <button id="transaction-close" 
+                    style="background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer;">
+                &times;
+            </button>
         </div>
+        <div id="transaction-details"></div>
+    </div>
+</div>
+
     </main>
 
     <script src="/js/api.js"></script>
@@ -163,11 +168,12 @@
         let refreshInterval;
         let currentPage = 0;
         const pageSize = 20;
+        let isWalletView = false;
+        let currentWalletAddress = '';
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadTransactions();
             setupAutoRefresh();
-            setupSearch();
         });
 
         async function loadTransactions() {
@@ -184,6 +190,37 @@
                 showError('Failed to load transactions');
             }
         }
+
+         // In your loadWalletTransactions function, add logging:
+async function loadWalletTransactions() {
+    const walletAddress = document.getElementById('wallet-address').value.trim();
+    
+    if (!walletAddress) {
+        alert('Please enter a wallet address');
+        return;
+    }
+    
+    try {
+        console.log('Loading transactions for wallet:', walletAddress); // Debug log
+        showLoading();
+        currentWalletAddress = walletAddress;
+        isWalletView = true;
+        
+        const transactions = await api.getTransactionsByAddress(walletAddress, 100);
+        console.log('Received transactions:', transactions); // Debug log
+        
+        allTransactions = transactions || [];
+        filteredTransactions = [...allTransactions];
+        
+        document.getElementById('table-title').textContent = `Transactions for ${api.formatHash(walletAddress, 8, 6)}`;
+        updateStats();
+        displayTransactions();
+        
+    } catch (error) {
+        console.error('Error loading wallet transactions:', error);
+        showError('Failed to load wallet transactions');
+    }
+}
 
         function updateStats() {
             if (allTransactions.length === 0) return;
@@ -214,6 +251,11 @@
             
             if (reset) {
                 tbody.innerHTML = '';
+            }
+
+            if (newTransactions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center">No transactions found</td></tr>`;
+                return;
             }
 
             newTransactions.forEach(tx => {
@@ -340,55 +382,106 @@
             document.getElementById('transaction-modal').style.display = 'none';
         }
 
-        function setupSearch() {
-            const searchInput = document.getElementById('search-input');
-            let searchTimeout;
-            
-            searchInput.addEventListener('input', () => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(applyFilters, 300);
-            });
+         
+         // Replace the current applyFilters function with this:
+function applyFilters() {
+    const statusFilter = document.getElementById('status-filter').value;
+    const typeFilter = document.getElementById('type-filter').value;
+    const searchValue = document.getElementById('wallet-address').value.trim().toLowerCase();
+
+    // If there's a search value, it's a wallet address search
+    if (searchValue && searchValue.length > 0) {
+        if (searchValue.length < 20) {
+            alert('Please enter a valid wallet address');
+            return;
         }
+        loadWalletTransactions();
+        return;
+    }
 
-        function applyFilters() {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const statusFilter = document.getElementById('status-filter').value;
-            const typeFilter = document.getElementById('type-filter').value;
+    // Otherwise, apply filters to existing transactions
+    filteredTransactions = allTransactions.filter(tx => {
+        const matchesStatus = !statusFilter || tx.status === statusFilter;
+        const matchesType = !typeFilter || tx.type === typeFilter;
+        return matchesStatus && matchesType;
+    });
 
-            filteredTransactions = allTransactions.filter(tx => {
-                const matchesSearch = !searchTerm || 
-                    tx.hash.toLowerCase().includes(searchTerm) ||
-                    tx.from.toLowerCase().includes(searchTerm) ||
-                    tx.to.toLowerCase().includes(searchTerm);
-                
-                const matchesStatus = !statusFilter || tx.status === statusFilter;
-                const matchesType = !typeFilter || tx.type === typeFilter;
+    document.getElementById('table-title').textContent = 'Recent Transactions';
+    isWalletView = false;
+    currentWalletAddress = '';
+    displayTransactions(true);
+}
 
-                return matchesSearch && matchesStatus && matchesType;
-            });
-
-            displayTransactions(true);
+// Update the search button event listener:
+document.addEventListener("DOMContentLoaded", () => {
+    // Button bindings
+    document.getElementById("clearBtn").addEventListener("click", clearFilters);
+    document.getElementById("searchBtn").addEventListener("click", applyFilters);
+    document.getElementById("refreshBtn").addEventListener("click", refreshTransactions);
+    
+    // Add Enter key support for search
+    document.getElementById("wallet-address").addEventListener("keypress", (e) => {
+        if (e.key === 'Enter') {
+            applyFilters();
         }
+    });
+});
+         function clearFilters() {
+    document.getElementById('wallet-address').value = '';
+    document.getElementById('status-filter').value = '';
+    document.getElementById('type-filter').value = '';
 
-        function clearFilters() {
-            document.getElementById('search-input').value = '';
-            document.getElementById('status-filter').value = '';
-            document.getElementById('type-filter').value = '';
-            
-            filteredTransactions = [...allTransactions];
-            displayTransactions(true);
-        }
+    isWalletView = false;
+    currentWalletAddress = '';
+    document.getElementById('table-title').textContent = 'Recent Transactions';
 
-        function loadMoreTransactions() {
-            displayTransactions(false);
-        }
+    loadTransactions(); // reload full list
+}
 
-        async function refreshTransactions() {
-            await loadTransactions();
-        }
+        // function loadMoreTransactions
+
+        document.addEventListener("DOMContentLoaded", () => {
+  // Button bindings (CSP-safe)
+  const clearBtn = document.getElementById("clearBtn");
+  const searchBtn = document.getElementById("searchBtn");
+  const refreshBtn = document.getElementById("refreshBtn");
+  const loadMoreBtn = document.getElementById("load-more-btn");
+
+  if (clearBtn) clearBtn.addEventListener("click", clearFilters);
+  if (searchBtn) {
+    searchBtn.addEventListener("click", () => {
+      const walletAddress = document.getElementById("wallet-address").value.trim();
+      if (walletAddress) {
+        loadWalletTransactions();
+      } else {
+        applyFilters();
+      }
+    });
+  }
+  if (refreshBtn) refreshBtn.addEventListener("click", refreshTransactions);
+
+  // Attach load more handler (no inline onclick)
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      loadMoreTransactions();
+    });
+  } else {
+    console.warn('load-more-btn not found in DOM.');
+  }
+
+  // other initializations if any
+});
+
 
         function setupAutoRefresh() {
             refreshInterval = setInterval(async () => {
+                if (isWalletView && currentWalletAddress) {
+                    // For wallet view, we might not want to auto-refresh as frequently
+                    // since it's a specific query
+                    return;
+                }
+                
                 const newTransactions = await api.getTransactions(20);
                 if (newTransactions && newTransactions.length > 0) {
                     // Add new transactions to the beginning
@@ -403,6 +496,11 @@
                     }
                 }
             }, 10000); // Refresh every 10 seconds
+        }
+
+        function showLoading() {
+            const tbody = document.getElementById('transactions-table');
+            tbody.innerHTML = `<tr><td colspan="9" class="loading"><div class="spinner"></div>Loading transactions...</td></tr>`;
         }
 
         function showError(message) {
@@ -428,6 +526,70 @@
                 clearInterval(refreshInterval);
             }
         });
+
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+    // Button bindings
+    document.getElementById("clearBtn").addEventListener("click", clearFilters);
+    document.getElementById("searchBtn").addEventListener("click", applyFilters);
+    document.getElementById("refreshBtn").addEventListener("click", refreshTransactions);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("transaction-modal");
+    const modalContent = modal.querySelector(".transaction-content");
+    const closeBtn = document.getElementById("transaction-close");
+
+    // Close when clicking backdrop
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            closeTransactionModal();
+        }
+    });
+
+    // Prevent closing when clicking inside modal content
+    modalContent.addEventListener("click", (e) => {
+        e.stopPropagation();
+    });
+
+    // Close when clicking X button
+    closeBtn.addEventListener("click", () => {
+        closeTransactionModal();
+    });
+});
+
+function openTransactionModal(tx) {
+    const modal = document.getElementById("transaction-modal");
+    document.getElementById("transaction-details").innerHTML = JSON.stringify(tx, null, 2);
+    modal.style.display = "block";
+}
+
+function closeTransactionModal() {
+    const modal = document.getElementById("transaction-modal");
+    modal.style.display = "none";
+}
+
+
+
+
+function renderTransactionRow(tx) {
+  return `
+    <tr>
+      <td data-label="Hash">${tx.hash}</td>
+      <td data-label="Block">${tx.blockNumber}</td>
+      <td data-label="From">${tx.from}</td>
+      <td data-label="To">${tx.to}</td>
+      <td data-label="Value (MON)">${tx.value}</td>
+      <td data-label="Fee">${tx.fee}</td>
+      <td data-label="Gas Used">${tx.gasUsed}</td>
+      <td data-label="Status">${tx.status}</td>
+      <td data-label="Time">${api.formatTimestamp(tx.timestamp)}</td>
+    </tr>
+  `;
+}
+
+
     </script>
 </body>
 </html>

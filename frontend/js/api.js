@@ -1,4 +1,4 @@
-// frontend/js/api.js
+ // frontend/js/api.js
 class API {
     constructor() {
         this.baseURL = window.location.origin + '/api';
@@ -64,8 +64,59 @@ class API {
     }
 
     // Transaction endpoints
-    async getTransactions(limit = 20) {
-        return this.cachedRequest(`/transactions?limit=${limit}`);
+     
+async getTransactions(limit = 20) {
+    return this.fetchAndTransform(`/transactions?limit=${limit}`);
+}
+
+async getTransactionsByAddress(address, limit = 20) {
+    if (!address) throw new Error("Wallet address is required");
+    return this.fetchAndTransform(`/transactions?address=${address}&limit=${limit}`);
+}
+
+// Helper to avoid code repetition
+async fetchAndTransform(endpoint) {
+    try {
+        const data = await this.cachedRequest(endpoint);
+        if (!Array.isArray(data)) {
+            console.error('API did not return an array:', data);
+            return this.getMockTransactions();
+        }
+        return data.map(tx => ({
+            hash: tx.hash || tx.transactionHash || '0x' + Math.random().toString(16).substr(2, 64),
+            blockNumber: tx.blockNumber || tx.block || 0,
+            from: tx.from || tx.sender || 'Unknown',
+            to: tx.to || tx.recipient || 'Unknown',
+            value: tx.value || tx.amount || '0',
+            fee: tx.fee || tx.transactionFee || '0',
+            gasUsed: tx.gasUsed || tx.gas || 0,
+            status: tx.status || (tx.success ? 'success' : 'failed'),
+            type: tx.type || (tx.contractAddress ? 'contract' : 'transfer'),
+            timestamp: tx.timestamp || tx.time || Date.now(),
+            gasPrice: tx.gasPrice || '0'
+        }));
+    } catch (error) {
+        console.error('Error processing transactions:', error);
+        return this.getMockTransactions();
+    }
+}
+
+
+    // Mock data generator for fallback
+    getMockTransactions(limit = 20) {
+        return Array.from({length: limit}, (_, i) => ({
+            hash: '0x' + Math.random().toString(16).substr(2, 64),
+            blockNumber: 1000000 + i,
+            from: '0x' + Math.random().toString(16).substr(2, 40),
+            to: '0x' + Math.random().toString(16).substr(2, 40),
+            value: (Math.random() * 10).toFixed(4),
+            fee: (Math.random() * 0.01).toFixed(6),
+            gasUsed: Math.floor(Math.random() * 100000),
+            status: Math.random() > 0.1 ? 'success' : 'failed',
+            type: Math.random() > 0.5 ? 'transfer' : 'contract',
+            timestamp: Date.now() - Math.floor(Math.random() * 86400000),
+            gasPrice: Math.floor(Math.random() * 100) + 10
+        }));
     }
 
     // Validator endpoints

@@ -1,18 +1,13 @@
-# Node modules
+ # dependencies
 node_modules/
 
-# Environment variables
+# environment variables
 .env
 
-# Logs
-logs
-*.log
-npm-debug.log*
+# logs
+npm-debug.log
+yarn-error.log
 
-# Build files
-dist
-build
-
-# OS and editor files
-.DS_Store
-.vscode
+# build output
+dist/
+build/

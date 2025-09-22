@@ -505,3 +505,59 @@ body {
 .text-warning { color: var(--warning-color); }
 .text-error { color: var(--error-color); }
 .text-muted { color: var(--text-muted); }
+
+
+
+/* Container scroll for small screens */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Make table look good */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem;
+  text-align: left;
+  white-space: nowrap; /* Prevents text breaking in cells */
+}
+
+/* Mobile-friendly collapsible view */
+@media (max-width: 768px) {
+  .responsive-table thead {
+    display: none; /* Hide table header */
+  }
+
+  .responsive-table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    padding: 0.5rem;
+    background: var(--surface, #fff);
+  }
+
+  .responsive-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .responsive-table td:last-child {
+    border-bottom: none;
+  }
+
+  .responsive-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    margin-right: 1rem;
+    color: var(--text-secondary, #666);
+  }
+}
